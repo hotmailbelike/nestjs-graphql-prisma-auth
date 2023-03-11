@@ -1,10 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { JwtService } from '@nestjs/jwt';
 import { PrismaService } from 'src/prisma/prisma.service';
-import { SignUpInput } from './dto/signup-input';
+import { SignupInput } from './dto/signup-input';
 import { UpdateAuthInput } from './dto/update-auth.input';
-import { hash } from 'argon2';
+import { hash, verify } from 'argon2';
+import { SignInInput } from './dto/signin-input';
 
 @Injectable()
 export class AuthService {
@@ -14,15 +15,46 @@ export class AuthService {
     private configService: ConfigService,
   ) {}
 
-  async signup(signUpInput: SignUpInput) {
+  async signup(signUpInput: SignupInput) {
     const hashedPassword = await hash(signUpInput.password);
     const user = await this.prisma.user.create({
       data: {
-        name: SignUpInput.name,
+        name: signUpInput.name,
         password: hashedPassword,
         email: signUpInput.email,
       },
     });
+
+    const { accessToken, refreshToken } = await this.createTokens(
+      user.id,
+      user.email,
+    );
+
+    await this.updateRefreshToken(user.id, refreshToken);
+
+    return {
+      accessToken,
+      refreshToken,
+      user,
+    };
+  }
+
+  async signIn(signInInput: SignInInput) {
+    const user = await this.prisma.user.findUnique({
+      where: {
+        email: signInInput.email,
+      },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const doPasswordsMatch = await verify(user.password, signInInput.password);
+
+    if (!doPasswordsMatch) {
+      throw new ForbiddenException('Access Denied');
+    }
 
     const { accessToken, refreshToken } = await this.createTokens(
       user.id,
