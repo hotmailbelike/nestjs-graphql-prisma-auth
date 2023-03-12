@@ -27,6 +27,8 @@ type Mutation {
 
 type Query {
   auth(id: Int!): Auth!
+  sayHi: String!
+  sayHiPublic: String!
 }
 
 input SignInInput {

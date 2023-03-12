@@ -6,16 +6,19 @@ import { UpdateAuthInput } from './dto/update-auth.input';
 import { AuthResponse } from './dto/auth-response';
 import { SignInInput } from './dto/signin-input';
 import { LogoutResponse } from './dto/logout-response';
+import { Public } from './decorators/public.decorator';
 
 @Resolver(() => Auth)
 export class AuthResolver {
   constructor(private readonly authService: AuthService) {}
 
+  @Public()
   @Mutation(() => AuthResponse) //query response
   signup(@Args('signupInput') signUpInput: SignupInput) {
     return this.authService.signup(signUpInput);
   }
 
+  @Public()
   @Mutation(() => AuthResponse)
   signIn(@Args('signInInput') signInInput: SignInInput) {
     return this.authService.signIn(signInInput);
@@ -24,6 +27,17 @@ export class AuthResolver {
   @Mutation(() => LogoutResponse)
   logout(@Args('id', { type: () => Int }) id: number) {
     return this.authService.logout(id);
+  }
+
+  @Query(() => String)
+  sayHi() {
+    return 'Hi, you are seeing this because you are authorized!';
+  }
+
+  @Public()
+  @Query(() => String)
+  sayHiPublic() {
+    return 'Hi, this is a public query!';
   }
 
   @Query(() => [Auth], { name: 'auth' })
