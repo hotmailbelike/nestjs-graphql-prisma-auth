@@ -70,6 +70,14 @@ export class AuthService {
     };
   }
 
+  async logout(userId: number) {
+    await this.prisma.user.updateMany({
+      where: { id: userId, refreshToken: { not: null } },
+      data: { refreshToken: null },
+    });
+    return { loggedOut: true };
+  }
+
   findAll() {
     return `This action returns all auth`;
   }
