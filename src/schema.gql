@@ -13,7 +13,12 @@ type AuthResponse {
   user: User!
 }
 
+type LogoutResponse {
+  loggedOut: Boolean!
+}
+
 type Mutation {
+  logout(id: Int!): LogoutResponse!
   removeAuth(id: Int!): Auth!
   signIn(signInInput: SignInInput!): AuthResponse!
   signup(signupInput: SignupInput!): AuthResponse!
