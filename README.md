@@ -1,3 +1,5 @@
+followed this playlist: https://www.youtube.com/playlist?list=PLl6yY6TinjfJLm3fh796ReTcsOEt0p-5t
+
 <p align="center">
   <a href="http://nestjs.com/" target="blank"><img src="https://nestjs.com/img/logo-small.svg" width="200" alt="Nest Logo" /></a>
 </p>
