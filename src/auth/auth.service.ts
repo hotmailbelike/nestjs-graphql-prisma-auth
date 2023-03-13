@@ -132,4 +132,32 @@ export class AuthService {
       },
     });
   }
+
+  async getNewTokens(userId: number, oldRefreshToken: string) {
+    const user = await this.prisma.user.findUnique({
+      where: { id: userId },
+    });
+
+    if (!user) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const doRefreshTokensMatch = await verify(
+      user.refreshToken,
+      oldRefreshToken,
+    );
+
+    if (!doRefreshTokensMatch) {
+      throw new ForbiddenException('Access Denied');
+    }
+
+    const { accessToken, refreshToken } = await this.createTokens(
+      user.id,
+      user.email,
+    );
+
+    await this.updateRefreshToken(user.id, refreshToken);
+
+    return { accessToken, refreshToken, user };
+  }
 }
